@@ -14,7 +14,25 @@ namespace LinearsBot
         [RequireBotPermission(GuildPermission.Administrator)]
         public async Task SetConfiguration(SocketRole role, SocketTextChannel channel)
         {
-			// Verif si ROLE DU BOT AU DESSUS DU ROLE STAFF !
+
+			if (Context.Guild.CurrentUser.Hierarchy <= role.Position)
+			{
+				var embed = new EmbedBuilder
+				{
+					Color = Color.DarkRed,
+					Title = " - Configuration - ",
+					Description = $"Erreur, annulation de l'exécution de la commande :\n> **Rôle** ➡️ {role.Mention}\n```\nLe rôle ne peut pas être attribué par le bot, essayez de mettre le rôle du bot au dessus de ce dernier.```",
+					Timestamp = DateTime.Now,
+					Footer = new EmbedFooterBuilder()
+					{
+						IconUrl = Functions.GetAvatarUrl(Context.User, 32),
+						Text = Context.User.Username + "#" + Context.User.Discriminator
+					}
+				};
+
+				await Context.Channel.SendMessageAsync("", false, embed.Build());
+				return;
+			}
 
 			ServerList serverList = Functions.ReadFromBinaryFile<ServerList>("data/serverslist");
 
