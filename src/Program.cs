@@ -16,6 +16,9 @@ namespace LinearsBot
 
         public async Task MainAsync()
         {
+			if (!Directory.Exists("data"))
+				Directory.CreateDirectory("data");
+
 			if (!File.Exists("data/stafflist"))
 				File.Create("data/stafflist");
 
