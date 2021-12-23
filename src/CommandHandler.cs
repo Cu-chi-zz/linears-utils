@@ -40,7 +40,7 @@ namespace LinearsBot
 			{
 				JObject cfg = Functions.GetConfig();
 				var channelInfo = rawMessage.Channel as SocketGuildChannel;
-				if (channelInfo.Guild.OwnerId == JsonConvert.DeserializeObject<ulong>(cfg["ownerid"].ToString()))
+				if (channelInfo.Guild.OwnerId == JsonConvert.DeserializeObject<ulong>(cfg["ownerId"].ToString()))
 				{
 					List<ulong> needModification = new List<ulong>();
 					foreach (var (key, value) in PersistentMessages.persistentMessages)
