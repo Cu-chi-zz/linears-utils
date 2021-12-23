@@ -9,7 +9,6 @@ namespace Linears
 	{
 		public struct StructPersistentMessages
 		{
-			public DateTime dateTime;
 			public EmbedBuilder embed;
 			public ulong lastMessage;
 		}
