@@ -51,7 +51,7 @@ namespace Linears
 				PersistentMessages.persistentMessages = new Dictionary<ulong, PersistentMessages.StructPersistentMessages>
 				{
 					{
-						Context.Channel.SendMessageAsync("", false, embed.Build()).Result.Channel.Id,
+						Context.Channel.Id,
 						new PersistentMessages.StructPersistentMessages
 						{
 							embed = embed,
@@ -70,6 +70,47 @@ namespace Linears
 			}
 
 			await Context.Message.DeleteAsync();
+		}
+
+		[Command("rempersistent")]
+		[RequireOwner()]
+		public async Task RemovePersistentMessage()
+		{
+			ulong channelId = Context.Channel.Id;
+
+			if (PersistentMessages.persistentMessages != null && PersistentMessages.persistentMessages.ContainsKey(channelId))
+			{
+				var embed = new EmbedBuilder
+				{
+					Color = Color.Orange,
+					Title = "Message persistant :",
+					Description = "Suppression du message persistant :\n> " + PersistentMessages.persistentMessages[channelId].embed.Description,
+					Footer = new EmbedFooterBuilder()
+					{
+						IconUrl = Functions.GetAvatarUrl(Context.User, 32),
+						Text = Context.User.Username + "#" + Context.User.Discriminator
+					}
+				};
+				PersistentMessages.persistentMessages.Remove(channelId);
+				await Context.Channel.SendMessageAsync("", false, embed.Build());
+				await Context.Message.DeleteAsync();
+			}
+			else
+			{
+				var embed = new EmbedBuilder
+				{
+					Color = Color.Orange,
+					Title = "Message persistant :",
+					Description = "Aucun message persistant n'a été trouvé dans ce channel.",
+					Footer = new EmbedFooterBuilder()
+					{
+						IconUrl = Functions.GetAvatarUrl(Context.User, 32),
+						Text = Context.User.Username + "#" + Context.User.Discriminator
+					}
+				};
+				await Context.Channel.SendMessageAsync("", false, embed.Build());
+				await Context.Message.DeleteAsync();
+			}
 		}
 	}
 }
