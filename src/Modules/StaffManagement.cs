@@ -15,7 +15,7 @@ namespace LinearsBot
         
         [Command("staff")]
 		[RequireOwner()]
-        public async Task AddStaff(string addOrRemove, SocketGuildUser user)
+        public async Task AddStaff(string addOrRemove = "", SocketGuildUser user = null)
 		{
 			if (addOrRemove != "add" && addOrRemove != "remove" || user == null)
 			{
