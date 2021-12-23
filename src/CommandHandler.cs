@@ -33,22 +33,39 @@ namespace LinearsBot
 
         private async Task HandleCommandAsync(SocketMessage rawMessage)
         {
+			if (rawMessage.Author.IsBot || !(rawMessage is SocketUserMessage message))
+				return;
+
 			if (PersistentMessages.persistentMessages != null)
 			{
-				foreach (var (key, value) in PersistentMessages.persistentMessages)
+				JObject cfg = Functions.GetConfig();
+				var channelInfo = rawMessage.Channel as SocketGuildChannel;
+				if (channelInfo.Guild.OwnerId == JsonConvert.DeserializeObject<ulong>(cfg["ownerid"].ToString()))
 				{
-					if (rawMessage.Channel.Id == key)
+					List<ulong> needModification = new List<ulong>();
+					foreach (var (key, value) in PersistentMessages.persistentMessages)
 					{
-						PersistentMessages.persistentMessages[key] = new PersistentMessages.StructPersistentMessages
+						if (rawMessage.Channel.Id == key)
 						{
-							lastMessage = rawMessage.Channel.SendMessageAsync("", false, PersistentMessages.persistentMessages[key].embed.Build()).Result.Id
-						};
+							needModification.Add(key);
+						}
+					}
+
+					if (needModification.Count > 0)
+					{
+						foreach (ulong channelId in needModification)
+						{
+							await rawMessage.Channel.GetCachedMessage(PersistentMessages.persistentMessages[channelId].lastMessage).DeleteAsync();
+
+							PersistentMessages.persistentMessages[channelId] = new PersistentMessages.StructPersistentMessages
+							{
+								embed = PersistentMessages.persistentMessages[channelId].embed,
+								lastMessage = rawMessage.Channel.SendMessageAsync("", false, PersistentMessages.persistentMessages[channelId].embed.Build()).Result.Id
+							};
+						}
 					}
 				}
 			}
-
-            if (rawMessage.Author.IsBot || !(rawMessage is SocketUserMessage message))
-                return;
 			
 			var context = new SocketCommandContext(_client, message);
 
