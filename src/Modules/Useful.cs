@@ -68,8 +68,6 @@ namespace Linears
 					lastMessage = Context.Channel.SendMessageAsync("", false, embed.Build()).Result.Id
 				});
 			}
-
-			await Context.Message.DeleteAsync();
 		}
 
 		[Command("rempersistent")]
@@ -77,6 +75,7 @@ namespace Linears
 		public async Task RemovePersistentMessage()
 		{
 			ulong channelId = Context.Channel.Id;
+			await Context.Channel.GetCachedMessage(PersistentMessages.persistentMessages[channelId].lastMessage).DeleteAsync();
 
 			if (PersistentMessages.persistentMessages != null && PersistentMessages.persistentMessages.ContainsKey(channelId))
 			{
@@ -109,7 +108,6 @@ namespace Linears
 					}
 				};
 				await Context.Channel.SendMessageAsync("", false, embed.Build());
-				await Context.Message.DeleteAsync();
 			}
 		}
 	}
