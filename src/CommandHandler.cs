@@ -10,7 +10,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
 
-namespace Discord_Bot
+namespace LinearsBot
 {
     public class CommandHandlingService
     {
@@ -44,9 +44,10 @@ namespace Discord_Bot
             // Check if message has any of the prefixes or mentiones the bot.
             if (prefixes.Any(x => message.HasStringPrefix(x, ref argPos)) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
             {
-                // Execute the command.
-                var result = await _commands.ExecuteAsync(context, argPos, _services);  
-            }
+				// Execute the command.
+				var result = await _commands.ExecuteAsync(context, argPos, _services);
+				if (!result.IsSuccess) Console.WriteLine(result.ErrorReason);
+			}
         }
 
         private async Task ClientReadyAsync()

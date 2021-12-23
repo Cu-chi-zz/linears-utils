@@ -1,19 +1,21 @@
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using System.Diagnostics;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Discord_Bot
+namespace LinearsBot
 {
     public class StaffManagement : ModuleBase<SocketCommandContext>
     {
         
         [Command("staff")]
-        public async Task AddStaff(string addOrRemove = "", SocketGuildUser user = null)
+		[RequireOwner()]
+        public async Task AddStaff(string addOrRemove, SocketGuildUser user)
 		{
 			if (addOrRemove != "add" && addOrRemove != "remove" || user == null)
 			{
@@ -24,15 +26,15 @@ namespace Discord_Bot
 
 			if (addOrRemove == "add")
 			{
-				StaffList newStaffList = ReadFromBinaryFile<StaffList>("stafflist");
+				StaffList newStaffList = Functions.ReadFromBinaryFile<StaffList>("stafflist");
 				if (newStaffList != null)
 				{
 					newStaffList.staffList.Add(Convert.ToString(user.Id));
-					WriteToBinaryFile("stafflist", newStaffList);
+					Functions.WriteToBinaryFile("stafflist", newStaffList);
 				}
 				else
 				{
-					WriteToBinaryFile("stafflist", new StaffList
+					Functions.WriteToBinaryFile("stafflist", new StaffList
 					{
 						staffList = new List<string> { Convert.ToString(user.Id) }
 					});
@@ -55,13 +57,13 @@ namespace Discord_Bot
 			}
 			else
 			{
-				StaffList newStaffList = ReadFromBinaryFile<StaffList>("stafflist");
+				StaffList newStaffList = Functions.ReadFromBinaryFile<StaffList>("stafflist");
 				if (newStaffList != null)
 				{
 					while (newStaffList.staffList.Contains(Convert.ToString(user.Id)))
 						newStaffList.staffList.Remove(Convert.ToString(user.Id));
 
-					WriteToBinaryFile("stafflist", newStaffList);
+					Functions.WriteToBinaryFile("stafflist", newStaffList);
 
 					var embed = new EmbedBuilder
 					{
@@ -84,7 +86,7 @@ namespace Discord_Bot
 		[Command("stafflist")]
 		public async Task StaffList()
 		{
-			StaffList newStaffList = ReadFromBinaryFile<StaffList>("stafflist");
+			StaffList newStaffList = Functions.ReadFromBinaryFile<StaffList>("stafflist");
 			if (newStaffList != null)
 			{
 				string list = null;
@@ -129,43 +131,108 @@ namespace Discord_Bot
 			}
 		}
 
-		/// <summary>
-		/// Writes the given object instance to a binary file.
-		/// <para>Object type (and all child types) must be decorated with the [Serializable] attribute.</para>
-		/// <para>To prevent a variable from being serialized, decorate it with the [NonSerialized] attribute; cannot be applied to properties.</para>
-		/// </summary>
-		/// <typeparam name="T">The type of object being written to the XML file.</typeparam>
-		/// <param name="filePath">The file path to write the object instance to.</param>
-		/// <param name="objectToWrite">The object instance to write to the XML file.</param>
-		/// <param name="append">If false the file will be overwritten if it already exists. If true the contents will be appended to the file.</param>
-		public static void WriteToBinaryFile<T>(string filePath, T objectToWrite, bool append = false)
+		[Command("staffrefresh")]
+		[RequireOwner()]
+		public async Task ReloadStaffList()
 		{
-			using (Stream stream = File.Open(filePath, append ? FileMode.Append : FileMode.Create))
+			StaffList staffList = Functions.ReadFromBinaryFile<StaffList>("stafflist");
+			if (staffList != null)
 			{
-				var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-				binaryFormatter.Serialize(stream, objectToWrite);
-			}
-		}
+				await Context.Channel.SendMessageAsync("Rafraichissement...");
+				ServerList serverList = Functions.ReadFromBinaryFile<ServerList>("serverlist");
 
-		/// <summary>
-		/// Reads an object instance from a binary file.
-		/// </summary>
-		/// <typeparam name="T">The type of object to read from the XML.</typeparam>
-		/// <param name="filePath">The file path to read the object instance from.</param>
-		/// <returns>Returns a new instance of the object read from the binary file.</returns>
-		public static T ReadFromBinaryFile<T>(string filePath)
-		{
-			using (Stream stream = File.Open(filePath, FileMode.Open))
-			{
-				if (stream.Length != 0)
+				if (serverList != null)
 				{
-					var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-					return (T)binaryFormatter.Deserialize(stream);
+					Stopwatch stopwatch = new Stopwatch();
+					stopwatch.Start();
+					foreach (var (key, value) in serverList.serverList)
+					{
+						SocketGuild socketGuild = Context.Client.GetGuild(Convert.ToUInt64(key));
+						SocketTextChannel socketTextChannel = socketGuild.GetTextChannel(Convert.ToUInt64(value[1]));
+
+						foreach (var role in socketGuild.Roles)
+						{
+							if (role.Id == Convert.ToUInt64(value[0]))
+							{
+								foreach (var user in role.Members)
+								{
+									bool isInStaffList = false;
+									foreach (string staffId in staffList.staffList)
+									{
+										if (Convert.ToString(user.Id) == staffId)
+										{
+											isInStaffList = true;
+											break;
+										}
+									}
+									if (!isInStaffList)
+										await user.RemoveRoleAsync(Convert.ToUInt64(value[0]));
+								}
+							}
+						}
+
+						foreach (string staffId in staffList.staffList)
+						{
+							SocketGuildUser socketGuildUser = socketGuild.GetUser(Convert.ToUInt64(staffId));
+
+							if (!socketGuildUser.Roles.Contains(socketGuild.GetRole(Convert.ToUInt64(value[0]))))
+							{
+								await socketGuildUser.AddRoleAsync(Convert.ToUInt64(value[0]));
+							}
+						}
+
+						var embed = new EmbedBuilder
+						{
+							Color = Color.Teal,
+							Title = "Rafraichissement de la liste des staffs",
+							Description = $"Liste des staffs rafraichie avec succès pour votre serveur !",
+							Timestamp = DateTime.Now,
+							Footer = new EmbedFooterBuilder()
+							{
+								IconUrl = Functions.GetAvatarUrl(Context.User, 32),
+								Text = Context.User.Username + "#" + Context.User.Discriminator
+							}
+						};
+						await socketTextChannel.SendMessageAsync("", false, embed.Build());
+						Console.WriteLine("Sended for server " + socketGuild.Name);
+					}
+					stopwatch.Stop();
+					await Context.Channel.SendMessageAsync($"Le raffraichissement à prit {stopwatch.Elapsed}");
 				}
 				else
 				{
-					return default;
+					var embed = new EmbedBuilder
+					{
+						Color = Color.Red,
+						Title = "Erreur",
+						Description = $"La liste des serveurs est *vide*...",
+						Timestamp = DateTime.Now,
+						Footer = new EmbedFooterBuilder()
+						{
+							IconUrl = Functions.GetAvatarUrl(Context.User, 32),
+							Text = Context.User.Username + "#" + Context.User.Discriminator
+						}
+					};
+
+					await Context.Channel.SendMessageAsync("", false, embed.Build());
 				}
+			}
+			else
+			{
+				var embed = new EmbedBuilder
+				{
+					Color = Color.Red,
+					Title = "Erreur",
+					Description = $"La liste des staffs est *vide*...",
+					Timestamp = DateTime.Now,
+					Footer = new EmbedFooterBuilder()
+					{
+						IconUrl = Functions.GetAvatarUrl(Context.User, 32),
+						Text = Context.User.Username + "#" + Context.User.Discriminator
+					}
+				};
+
+				await Context.Channel.SendMessageAsync("", false, embed.Build());
 			}
 		}
 	}

@@ -6,11 +6,12 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System.Globalization;
 
-namespace Discord_Bot
+namespace LinearsBot
 {
     public class Informations : ModuleBase<SocketCommandContext>
     {
         [Command("ping")]
         public async Task Ping() => await ReplyAsync($"Latency: {Context.Client.Latency} ms");
+
     }
 }

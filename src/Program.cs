@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 
-namespace Discord_Bot
+namespace LinearsBot
 {
     public class Program
     {
@@ -29,7 +29,6 @@ namespace Discord_Bot
             await client.StartAsync();
 
 			await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
-
 			await Task.Delay(-1);
         }
 
@@ -38,10 +37,10 @@ namespace Discord_Bot
             return new ServiceCollection()
 				.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
 				{
-					MessageCacheSize = 50,
-					LogLevel = LogSeverity.Info,
 					AlwaysDownloadUsers = true,
-					GatewayIntents = GatewayIntents.All
+					MessageCacheSize = 100,
+					GatewayIntents = GatewayIntents.All,
+					LogLevel = LogSeverity.Verbose
 				}))
 				.AddSingleton(new CommandService(new CommandServiceConfig
                 { 
