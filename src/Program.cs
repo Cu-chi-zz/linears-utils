@@ -6,6 +6,7 @@ using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using System.Linq;
+using System.IO;
 
 namespace LinearsBot
 {
@@ -15,7 +16,13 @@ namespace LinearsBot
 
         public async Task MainAsync()
         {
-            using var services = ConfigureServices();
+			if (!File.Exists("data/stafflist"))
+				File.Create("data/stafflist");
+
+			if (!File.Exists("data/serverslist"))
+				File.Create("data/serverslist");
+
+			using var services = ConfigureServices();
 
 			ColoredMessage(ConsoleColor.Yellow, "-> Le bot démarre...");
 			DiscordSocketClient client = services.GetRequiredService<DiscordSocketClient>();

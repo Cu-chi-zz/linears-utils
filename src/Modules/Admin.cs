@@ -15,7 +15,7 @@ namespace LinearsBot
         {
 			// Verif si ROLE DU BOT AU DESSUS DU ROLE STAFF !
 
-			ServerList serverList = Functions.ReadFromBinaryFile<ServerList>("serverlist");
+			ServerList serverList = Functions.ReadFromBinaryFile<ServerList>("data/serverslist");
 
 			if (serverList != null)
 			{
@@ -23,7 +23,7 @@ namespace LinearsBot
 				{
 					serverList.serverList[Convert.ToString(Context.Guild.Id)][0] = Convert.ToString(role.Id);
 					serverList.serverList[Convert.ToString(Context.Guild.Id)][1] = Convert.ToString(channel.Id);
-					Functions.WriteToBinaryFile("serverlist", serverList);
+					Functions.WriteToBinaryFile("data/serverslist", serverList);
 
 					var embed = new EmbedBuilder
 					{
@@ -58,7 +58,7 @@ namespace LinearsBot
 						Convert.ToString(role.Id),
 						Convert.ToString(channel.Id)
 					});
-					Functions.WriteToBinaryFile("serverlist", serverList);
+					Functions.WriteToBinaryFile("data/serverslist", serverList);
 
 					var embed = new EmbedBuilder
 					{
@@ -89,7 +89,7 @@ namespace LinearsBot
 			}
 			else
 			{
-				Functions.WriteToBinaryFile("serverlist", new ServerList
+				Functions.WriteToBinaryFile("data/serverslist", new ServerList
 				{
 					serverList = new Dictionary<string, string[]>()
 				});
@@ -100,7 +100,7 @@ namespace LinearsBot
 		[RequireBotPermission(GuildPermission.Administrator)]
 		public async Task GetConfiguration()
 		{
-			ServerList serverList = Functions.ReadFromBinaryFile<ServerList>("serverlist");
+			ServerList serverList = Functions.ReadFromBinaryFile<ServerList>("data/serverslist");
 
 			if (serverList != null)
 			{
@@ -156,7 +156,7 @@ namespace LinearsBot
 			}
 			else
 			{
-				Functions.WriteToBinaryFile("serverlist", new ServerList
+				Functions.WriteToBinaryFile("data/serverslist", new ServerList
 				{
 					serverList = new Dictionary<string, string[]>()
 				});

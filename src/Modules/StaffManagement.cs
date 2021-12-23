@@ -26,15 +26,15 @@ namespace LinearsBot
 
 			if (addOrRemove == "add")
 			{
-				StaffList newStaffList = Functions.ReadFromBinaryFile<StaffList>("stafflist");
+				StaffList newStaffList = Functions.ReadFromBinaryFile<StaffList>("data/stafflist");
 				if (newStaffList != null)
 				{
 					newStaffList.staffList.Add(Convert.ToString(user.Id));
-					Functions.WriteToBinaryFile("stafflist", newStaffList);
+					Functions.WriteToBinaryFile("data/stafflist", newStaffList);
 				}
 				else
 				{
-					Functions.WriteToBinaryFile("stafflist", new StaffList
+					Functions.WriteToBinaryFile("data/stafflist", new StaffList
 					{
 						staffList = new List<string> { Convert.ToString(user.Id) }
 					});
@@ -57,13 +57,13 @@ namespace LinearsBot
 			}
 			else
 			{
-				StaffList newStaffList = Functions.ReadFromBinaryFile<StaffList>("stafflist");
+				StaffList newStaffList = Functions.ReadFromBinaryFile<StaffList>("data/stafflist");
 				if (newStaffList != null)
 				{
 					while (newStaffList.staffList.Contains(Convert.ToString(user.Id)))
 						newStaffList.staffList.Remove(Convert.ToString(user.Id));
 
-					Functions.WriteToBinaryFile("stafflist", newStaffList);
+					Functions.WriteToBinaryFile("data/stafflist", newStaffList);
 
 					var embed = new EmbedBuilder
 					{
@@ -86,7 +86,7 @@ namespace LinearsBot
 		[Command("stafflist")]
 		public async Task StaffList()
 		{
-			StaffList newStaffList = Functions.ReadFromBinaryFile<StaffList>("stafflist");
+			StaffList newStaffList = Functions.ReadFromBinaryFile<StaffList>("data/stafflist");
 			if (newStaffList != null)
 			{
 				string list = null;
@@ -135,11 +135,11 @@ namespace LinearsBot
 		[RequireOwner()]
 		public async Task ReloadStaffList()
 		{
-			StaffList staffList = Functions.ReadFromBinaryFile<StaffList>("stafflist");
+			StaffList staffList = Functions.ReadFromBinaryFile<StaffList>("data/stafflist");
 			if (staffList != null)
 			{
 				await Context.Channel.SendMessageAsync("Rafraichissement...");
-				ServerList serverList = Functions.ReadFromBinaryFile<ServerList>("serverlist");
+				ServerList serverList = Functions.ReadFromBinaryFile<ServerList>("data/serverslist");
 
 				if (serverList != null)
 				{
