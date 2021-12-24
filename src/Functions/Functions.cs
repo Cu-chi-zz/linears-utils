@@ -66,5 +66,13 @@ namespace LinearsBot
 				}
 			}
 		}
+
+		public static void ColoredMessage(ConsoleColor bgColor = ConsoleColor.Black, ConsoleColor fgColor = ConsoleColor.White, string msg = "")
+		{
+			Console.BackgroundColor = bgColor;
+			Console.ForegroundColor = fgColor;
+			Console.WriteLine(msg);
+			Console.ResetColor();
+		}
 	}
 }
