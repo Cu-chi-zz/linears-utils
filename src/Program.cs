@@ -34,7 +34,7 @@ namespace LinearsBot
 			if (config["keepUpdated"].Value<bool>())
 			{
 				webClient = new WebClient();
-				Uri webVersion = new Uri("https://github.com/Cu-chi/linears-utils/blob/master/version");
+				Uri webVersion = new Uri("https://raw.githubusercontent.com/Cu-chi/linears-utils/master/version");
 				webClient.DownloadStringAsync(webVersion);
 				webClient.DownloadStringCompleted += DownloadStringVersionCompleted;
 			}
