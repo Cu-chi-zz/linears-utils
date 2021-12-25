@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -13,7 +14,25 @@ namespace LinearsBot
         [RequireBotPermission(GuildPermission.Administrator)]
         public async Task SetConfiguration(SocketRole role, SocketTextChannel channel)
         {
-			// Verif si ROLE DU BOT AU DESSUS DU ROLE STAFF !
+
+			if (Context.Guild.CurrentUser.Hierarchy <= role.Position)
+			{
+				var embed = new EmbedBuilder
+				{
+					Color = Color.DarkRed,
+					Title = " - Configuration - ",
+					Description = $"Erreur, annulation de l'exécution de la commande :\n> **Rôle** ➡️ {role.Mention}\n```\nLe rôle ne peut pas être attribué par le bot, essayez de mettre le rôle du bot au dessus de ce dernier.```",
+					Timestamp = DateTime.Now,
+					Footer = new EmbedFooterBuilder()
+					{
+						IconUrl = Functions.GetAvatarUrl(Context.User, 32),
+						Text = Context.User.Username + "#" + Context.User.Discriminator
+					}
+				};
+
+				await Context.Channel.SendMessageAsync("", false, embed.Build());
+				return;
+			}
 
 			ServerList serverList = Functions.ReadFromBinaryFile<ServerList>("data/serverslist");
 
@@ -93,6 +112,41 @@ namespace LinearsBot
 				{
 					serverList = new Dictionary<string, string[]>()
 				});
+
+				serverList = Functions.ReadFromBinaryFile<ServerList>("data/serverslist");
+
+				serverList.serverList.Add(Convert.ToString(Context.Guild.Id), new string[2]
+				{
+					Convert.ToString(role.Id),
+					Convert.ToString(channel.Id)
+				});
+				Functions.WriteToBinaryFile("data/serverslist", serverList);
+
+				var embed = new EmbedBuilder
+				{
+					Color = Color.Blue,
+					Title = " - Configuration - ",
+					Description = $"Serveur `{Context.Guild.Name}` ajouté.",
+					Timestamp = DateTime.Now,
+					Footer = new EmbedFooterBuilder()
+					{
+						IconUrl = Functions.GetAvatarUrl(Context.User, 32),
+						Text = Context.User.Username + "#" + Context.User.Discriminator
+					}
+				};
+				embed.AddField(new EmbedFieldBuilder
+				{
+					IsInline = true,
+					Name = "Rôle",
+					Value = role.Mention
+				}).AddField(new EmbedFieldBuilder
+				{
+					IsInline = true,
+					Name = "Channel",
+					Value = channel.Mention
+				});
+
+				await Context.Channel.SendMessageAsync("", false, embed.Build());
 			}
 		}
 
@@ -156,10 +210,20 @@ namespace LinearsBot
 			}
 			else
 			{
-				Functions.WriteToBinaryFile("data/serverslist", new ServerList
+				var embed = new EmbedBuilder
 				{
-					serverList = new Dictionary<string, string[]>()
-				});
+					Color = Color.Red,
+					Title = " - Configuration - ",
+					Description = $"Serveur `{Context.Guild.Name}` introuvable, essayez d'ajouter une configuration via la commande :\n`config [rôle] [channel]`.",
+					Timestamp = DateTime.Now,
+					Footer = new EmbedFooterBuilder()
+					{
+						IconUrl = Functions.GetAvatarUrl(Context.User, 32),
+						Text = Context.User.Username + "#" + Context.User.Discriminator
+					}
+				};
+
+				await Context.Channel.SendMessageAsync("", false, embed.Build());
 			}
 		}
     }
