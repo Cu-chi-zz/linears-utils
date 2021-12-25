@@ -14,8 +14,8 @@ namespace LinearsBot
 {
     public class Program
     {
-		private readonly ushort[] version = new ushort[3]{ 0, 0, 0 }; // Major, Minor, Patch
-	private WebClient webClient;
+		private readonly ushort[] version = new ushort[3]{ 1, 2, 10 }; // Major, Minor, Patch
+		private WebClient webClient;
 
 		static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
