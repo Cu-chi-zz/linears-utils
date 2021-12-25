@@ -67,7 +67,7 @@ namespace LinearsBot
 				Console.WriteLine();
 				Functions.ColoredMessage(ConsoleColor.Black, ConsoleColor.Magenta, "-> La version va être télécharhée vers \"\"");
 
-				Uri fileLink = new Uri("https://github.com/Cu-chi/CClick/releases/download/{latestVersion}/CClick-{latestVersion}.zip");
+				Uri fileLink = new Uri("https://github.com/Cu-chi/linears-utils/releases/download/{latestVersion}/linearsbot-{latestVersion}.zip");
 				webClient.DownloadFileAsync(fileLink, "new-linears-bot.zip");
 				webClient.DownloadFileCompleted += WebClient_DownloadFileCompleted;
 			}
