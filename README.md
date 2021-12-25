@@ -1,5 +1,5 @@
 # linears-utils
-> Discord bot made with C# and [**DiscordNet**](https://github.com/discord-net/Discord.Net) library fr the [**Linears project**](https://discord.gg/tC482G3GXu) server on [**FiveM**](https://fivem.net/)
+> Discord bot made with C# and [**DiscordNet**](https://github.com/discord-net/Discord.Net) library for the [**Linears project**](https://discord.gg/tC482G3GXu) server on [**FiveM**](https://fivem.net/)
 
 Commands list
 | Accessibility       | Command Name  | Parameters       | Description                                                                                         | Example                                                        |
