@@ -14,8 +14,8 @@ namespace LinearsBot
 {
     public class Program
     {
-		private readonly string version = "1.0.0";
-		private WebClient webClient;
+		private readonly ushort[] version = new ushort[3]{ 0, 0, 0 }; // Major, Minor, Patch
+	private WebClient webClient;
 
 		static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
@@ -57,17 +57,22 @@ namespace LinearsBot
 
 		private void DownloadStringVersionCompleted(object sender, DownloadStringCompletedEventArgs e)
 		{
-			string latestVersion = e.Result;
+			ushort[] versionInformations = new ushort[3]{
+				Convert.ToUInt16(e.Result.Split('.')[0]), // Major
+				Convert.ToUInt16(e.Result.Split('.')[1]), // Minor
+				Convert.ToUInt16(e.Result.Split('.')[2])  // Patch
+			};
 
-			if (latestVersion != version)
+			if (versionInformations[0] > version[0] || versionInformations[1] > version[1] || versionInformations[2] > version[2])
 			{
 				Functions.ColoredMessage(ConsoleColor.Black, ConsoleColor.Red, "-> Une nouvelle version est disponible :");
-				Functions.ColoredMessage(ConsoleColor.Black, ConsoleColor.Yellow, "-> Version locale : " + version);
-				Functions.ColoredMessage(ConsoleColor.Black, ConsoleColor.Green, "-> Version distante : " + latestVersion);
+				Functions.ColoredMessage(ConsoleColor.Black, ConsoleColor.Yellow, $"-> Version locale : {version[0]}.{version[1]}.{version[2]}");
+				Functions.ColoredMessage(ConsoleColor.Black, ConsoleColor.Green, $"-> Version distante : {versionInformations[0]}.{versionInformations[1]}.{versionInformations[2]}");
 				Console.WriteLine();
 				Functions.ColoredMessage(ConsoleColor.Black, ConsoleColor.Magenta, "-> La version va être télécharhée vers \"\"");
 
-				Uri fileLink = new Uri("https://github.com/Cu-chi/linears-utils/releases/download/{latestVersion}/linearsbot-{latestVersion}.zip");
+				Uri fileLink = new Uri($"https://github.com/Cu-chi/linears-utils/releases/download/{versionInformations[0]}.{versionInformations[1]}.{versionInformations[2]}/linearsbot-{versionInformations[0]}.{versionInformations[1]}.{versionInformations[2]}.zip");
+
 				webClient.DownloadFileAsync(fileLink, "new-linears-bot.zip");
 				webClient.DownloadFileCompleted += WebClient_DownloadFileCompleted;
 			}
