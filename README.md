@@ -12,6 +12,7 @@ Commands list
 | Bot Owner           | staffrefresh  | NONE             | Refresh the bot's staff list in all servers                                                         | staffrefresh                                                   |
 | Bot Owner           | persistent    | message          | Send a persistent message in the channel where the message is sended (needs to be manually removed) | peristent Hey everyone, currently working on the server :wink: |
 | Bot Owner           | rempersistent | NONE             | Remove the persistent message in the channel where the message is sended                            | rempersistent                                                  |
+
 Configuration file structure
 ```json
 {
