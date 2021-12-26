@@ -84,10 +84,15 @@ namespace LinearsBot
 
 		private void DeletePreviousVersion(object sender = null, EventArgs e = null)
 		{
+			string[] newVersionFiles = Directory.GetFiles(Directory.GetCurrentDirectory());
+
 			string parentPath = Directory.GetParent(Directory.GetCurrentDirectory()).FullName;
 
 			foreach (string file in Directory.GetFiles(parentPath))
-				File.Delete(file);
+				foreach (string newVersionFile in newVersionFiles)
+					if (new FileInfo(file).Name == new FileInfo(newVersionFile).Name)
+						File.Delete(file);
+				
 
 			Directory.Delete(parentPath + "\\data", true);
 		}
