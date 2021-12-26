@@ -130,7 +130,7 @@ namespace LinearsBot
 			ZipFile.ExtractToDirectory("new-linears-bot.zip", "lastupdate");
 			File.Delete("new-linears-bot.zip");
 			Functions.DirectoryCopy("data", Directory.GetCurrentDirectory() + "lastupdate\\data", true);
-			File.Copy("config.json", "lastupdate\\config.json");
+			File.Copy("config.json", "lastupdate\\config.json", true);
 			Functions.ColoredMessage(ConsoleColor.Black, ConsoleColor.Green, "-> Nouvelle version téléchargée avec succès vers :\n-> " + Directory.GetCurrentDirectory() + "\\lastupdate");
 
 			Process.Start(Directory.GetCurrentDirectory() + "\\lastupdate\\LinearsBot.exe");
