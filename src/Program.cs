@@ -15,7 +15,7 @@ namespace LinearsBot
 {
 	public class Program
 	{
-		private readonly ushort[] version = new ushort[3] { 1, 3, 11 }; // Major, Minor, Patch
+		private readonly ushort[] version = new ushort[3] { 1, 3, 12 }; // Major, Minor, Patch
 		private WebClient webClient;
 
 		static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
@@ -92,7 +92,6 @@ namespace LinearsBot
 				foreach (string newVersionFile in newVersionFiles)
 					if (new FileInfo(file).Name == new FileInfo(newVersionFile).Name)
 						File.Delete(file);
-				
 
 			Directory.Delete(parentPath + "\\data", true);
 		}
@@ -130,7 +129,8 @@ namespace LinearsBot
 			Directory.CreateDirectory("lastupdate");
 			ZipFile.ExtractToDirectory("new-linears-bot.zip", "lastupdate");
 			File.Delete("new-linears-bot.zip");
-
+			Functions.DirectoryCopy("data", Directory.GetCurrentDirectory() + "lastupdate\\data", true);
+			File.Copy("config.json", "lastupdate\\config.json");
 			Functions.ColoredMessage(ConsoleColor.Black, ConsoleColor.Green, "-> Nouvelle version téléchargée avec succès vers :\n-> " + Directory.GetCurrentDirectory() + "\\lastupdate");
 
 			Process.Start(Directory.GetCurrentDirectory() + "\\lastupdate\\LinearsBot.exe");
