@@ -9,18 +9,45 @@ using System.Linq;
 using System.IO;
 using System.Net;
 using System.IO.Compression;
+using System.Diagnostics;
 
 namespace LinearsBot
 {
-    public class Program
-    {
-		private readonly ushort[] version = new ushort[3]{ 1, 2, 11 }; // Major, Minor, Patch
+	public class Program
+	{
+		private readonly ushort[] version = new ushort[3] { 1, 2, 11 }; // Major, Minor, Patch
 		private WebClient webClient;
 
 		static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
 		public async Task MainAsync()
 		{
+			// If is a new version part
+			if (new DirectoryInfo(Directory.GetCurrentDirectory()).Name == "lastupdate")
+			{
+				string[] files = Directory.GetFiles(Directory.GetParent(Directory.GetCurrentDirectory()).FullName);
+				foreach (string file in files)
+				{
+					if (File.Exists(file) && file.EndsWith(".exe"))
+					{
+						bool findedInProcList = false;
+						foreach (Process process in Process.GetProcessesByName(file))
+						{
+							if (process.Id != Process.GetCurrentProcess().Id)
+							{
+								process.Kill();
+								process.Exited += DeletePreviousVersion;
+								findedInProcList = true;
+								break;
+							}
+						}
+
+						if (!findedInProcList)
+							DeletePreviousVersion();
+					}
+				}
+			}
+
 			if (!Directory.Exists("data"))
 				Directory.CreateDirectory("data");
 
@@ -55,6 +82,16 @@ namespace LinearsBot
 			await Task.Delay(-1);
 		}
 
+		private void DeletePreviousVersion(object sender = null, EventArgs e = null)
+		{
+			string parentPath = Directory.GetParent(Directory.GetCurrentDirectory()).FullName;
+
+			foreach (string file in Directory.GetFiles(parentPath))
+				File.Delete(file);
+
+			Directory.Delete(parentPath + "\\data", true);
+		}
+
 		private void DownloadStringVersionCompleted(object sender, DownloadStringCompletedEventArgs e)
 		{
 			ushort[] versionInformations = new ushort[3]{
@@ -87,12 +124,16 @@ namespace LinearsBot
 			}
 			Directory.CreateDirectory("lastupdate");
 			ZipFile.ExtractToDirectory("new-linears-bot.zip", "lastupdate");
+			File.Delete("new-linears-bot.zip");
+
 			Functions.ColoredMessage(ConsoleColor.Black, ConsoleColor.Green, "-> Nouvelle version téléchargée avec succès vers :\n-> " + Directory.GetCurrentDirectory() + "\\lastupdate");
+
+			Process.Start(Directory.GetCurrentDirectory() + "\\lastupdate\\LinearsBot.exe");
 		}
 
 		public ServiceProvider ConfigureServices()
-        {
-            return new ServiceCollection()
+		{
+			return new ServiceCollection()
 				.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
 				{
 					AlwaysDownloadUsers = true,
@@ -101,19 +142,19 @@ namespace LinearsBot
 					LogLevel = LogSeverity.Verbose
 				}))
 				.AddSingleton(new CommandService(new CommandServiceConfig
-                { 
-                    LogLevel = LogSeverity.Info,
-                    DefaultRunMode = RunMode.Async,
-                    CaseSensitiveCommands = false,
-                }))
-                .AddSingleton<CommandHandlingService>()
-                .BuildServiceProvider();
-        }
+				{
+					LogLevel = LogSeverity.Info,
+					DefaultRunMode = RunMode.Async,
+					CaseSensitiveCommands = false,
+				}))
+				.AddSingleton<CommandHandlingService>()
+				.BuildServiceProvider();
+		}
 
-        private Task Log(LogMessage log)
-        {
-            Console.WriteLine(log.ToString());
-            return Task.CompletedTask;
-        }
-    }
+		private Task Log(LogMessage log)
+		{
+			Console.WriteLine(log.ToString());
+			return Task.CompletedTask;
+		}
+	}
 }
